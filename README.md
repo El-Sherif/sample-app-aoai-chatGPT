@@ -134,11 +134,11 @@ The landing chat page logo and headers are specified in `frontend/src/pages/chat
         aria-hidden="true"
     />
     <h1 className={styles.chatEmptyStateTitle}>Start chatting</h1>
-    <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions</h2>
+    <h2 className={styles.chatEmptyStateSubtitle}>This SSSchatbot is configured to answer your questions</h2>
 </Stack>
 ```
 To update the logo, change `src={Azure}` to point to your own SVG file, which you can put in `frontend/src/assets`/
-To update the headers, change the strings "Start chatting" and "This chatbot is configured to answer your questions" to your desired values.
+To update the headers, change the strings "Start chatting" and "This SSSchatbot is configured to answer your questions" to your desired values.
 
 ### Changing Citation Display
 The Citation panel is defined at the end of `frontend/src/pages/chat/Chat.tsx`. The citations returned from Azure OpenAI On Your Data will include `content`, `title`, `filepath`, and in some cases `url`. You can customize the Citation section to use and display these as you like. For example, the "View Source" button will open the citation URL in a new tab when clicked:
