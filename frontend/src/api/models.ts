@@ -24,9 +24,10 @@ export type ChatMessage = {
     id: string;
     role: string;
     content: string;
-    end_turn?: boolean;
     date: string;
-};
+    time: string; // Add this line for the time property
+  }
+  
 
 export type Conversation = {
     id: string;

@@ -2,7 +2,8 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px
+    gap: 20px;
+
 }
 
 .chatRoot {
@@ -25,6 +26,8 @@
     border-radius: 8px;
     overflow-y: auto;
     max-height: calc(100vh - 100px);
+    border: 4px solid #4070ae; /* Add this line to set the border color */
+
 }
 
 .chatEmptyState {
@@ -105,6 +108,7 @@
     margin-bottom: 12px;
     max-width: 80%;
     display: flex;
+
 }
 
 .chatMessageError {
@@ -327,3 +331,70 @@ a {
     text-decoration: underline;
     cursor: pointer;
 }
+
+
+
+/* Add the following styles to your existing CSS */
+
+.buttonContainer {
+    display: flex;
+    justify-content: center; /* Center items horizontally */
+    gap: 10px; /* Adjust the gap between buttons as needed */
+    margin-top: 10px; /* Adjust the top margin to separate buttons from the message */
+}
+
+.questionInputSendButtonContainer {
+    /* Optional: Add styling for the button container if needed */
+}
+
+.questionInputSendButton {
+    width: 20px; /* Adjust the width as needed */
+    height: 20px; /* Adjust the height as needed */
+}
+
+.chatMessageGpt {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally within the message */
+}
+
+/* Add this to your existing styles or create a new CSS file */
+.timestamp {
+    text-align: center;
+    font-size: 12px; /* Adjust the font size as needed */
+    color: #888; /* Adjust the color as needed */
+    margin-top: 5px; /* Adjust the margin as needed */
+}
+.assistantImage {
+    /* Styling for the assistant image */
+    width: 30px; /* Adjust the width as needed */
+    height: 30px; /* Adjust the height as needed */
+    margin-right: 10px; /* Adjust the margin to create space between image and text */
+}
+
+.learning-options-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .learning-option-button {
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid #376B7E;
+    margin: 3px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  @media (max-width: 600px) {
+    .learning-options-container {
+      flex-direction: column;
+    }
+  }
+  
+  
+  

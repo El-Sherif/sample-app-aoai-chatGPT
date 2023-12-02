@@ -10,7 +10,10 @@ import { isEmpty } from "lodash-es";
 
 import styles from "./Chat.module.css";
 import Azure from "../../assets/Azure.svg";
-
+import like from "../../assets/like.svg";
+import dislike from "../../assets/dislike.svg";
+import like2 from "../../assets/like2.svg";
+import dislike2 from "../../assets/dislike2.svg";
 import {
     ChatMessage,
     ConversationRequest,
@@ -39,6 +42,29 @@ const enum messageStatus {
     Done = "Done"
 }
 
+const buttonContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row', // Default to row for larger screens
+    flexWrap: 'wrap',
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    padding: '0.5rem',
+    borderRadius: '8px',
+    background: 'transparent',
+    border: '2px solid #376B7E',
+    margin: '3px',
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    outline: 'none',
+  };
+
+
+
+
 const Chat = () => {
     const appStateContext = useContext(AppStateContext)
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
@@ -53,6 +79,93 @@ const Chat = () => {
     const [clearingChat, setClearingChat] = useState<boolean>(false);
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
+
+    const [likedMessages, setLikedMessages] = useState<{ index: number; action: number }[]>([]);
+
+    const handleLikeDislike = (index: number, action: number) => {
+        const existingIndex = likedMessages.findIndex((item) => item.index === index);
+    
+        if (existingIndex !== -1) {
+            // If the message is already liked or disliked, toggle the action
+            const updatedLikedMessages = [...likedMessages];
+            const existingAction = updatedLikedMessages[existingIndex].action;
+    
+            if (existingAction === action) {
+                // If the action is the same, remove the entry (cancel the like or dislike)
+                updatedLikedMessages.splice(existingIndex, 1);
+            } else {
+                // If the action is different, update the existing entry
+                updatedLikedMessages[existingIndex].action = action;
+            }
+    
+            setLikedMessages(updatedLikedMessages);
+        } else {
+            // If the message is not yet liked or disliked, add a new entry
+            setLikedMessages([...likedMessages, { index, action }]);
+        }
+    };
+    
+    const handleButtonClick = (question: any, conversationId?: string) => {
+        if (!isLoading) {
+          if (appStateContext?.state.isCosmosDBAvailable?.cosmosDB) {
+            // Make API request with Cosmos DB
+            makeApiRequestWithCosmosDB(question);
+          } else {
+            // Make API request without Cosmos DB
+            makeApiRequestWithoutCosmosDB(question);
+          }
+        }
+      };
+
+    
+    const renderButtons = (index: number) => {
+        const likeClicked = likedMessages.some((item) => item.index === index && item.action === 1);
+        const dislikeClicked = likedMessages.some((item) => item.index === index && item.action === -1);
+    
+        return (
+            <div className={styles.buttonContainer}>
+                <div
+                    className={`${styles.questionInputSendButtonContainer} ${likeClicked ? styles.clickedButton : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleLikeDislike(index, 1)}
+                    style={{ cursor: likedMessages.some((item) => item.index === index) ? 'not-allowed' : 'pointer' }}
+                >
+                    <img src={likeClicked ? like2 : like} className={styles.questionInputSendButton} alt="Like" />
+                </div>
+                <div
+                    className={`${styles.questionInputSendButtonContainer} ${dislikeClicked ? styles.clickedButton : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleLikeDislike(index, -1)}
+                    style={{ cursor: likedMessages.some((item) => item.index === index) ? 'not-allowed' : 'pointer' }}
+                >
+                    <img src={dislikeClicked ? dislike2 : dislike} className={styles.questionInputSendButton} alt="Dislike" />
+                </div>
+            </div>
+        );
+    };
+
+
+    
+
+    const getCurrentTime = () => {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+      };
+    
+//      const simulateTypingEffect = async (text, sender) => {
+  //      for (let i = 0; i < text.length; i++) {
+    //      await new Promise((resolve) => setTimeout(resolve, 100));
+      //    setMessages((prevMessages) => [
+        //    ...prevMessages.slice(0, -1),
+     //       { text: text.slice(0, i + 1), sender, time: getCurrentTime() },
+       //   ]);
+      //  }
+     // };
+    
 
     const errorDialogContentProps = {
         type: DialogType.close,
@@ -106,11 +219,16 @@ const Chat = () => {
     let toolMessage = {} as ChatMessage
     let assistantContent = ""
 
-    const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
+    const processResultMessage = (
+        resultMessage: ChatMessage,
+        userMessage: ChatMessage,
+        conversationId?: string
+      ) => {
         if (resultMessage.role === ASSISTANT) {
-            assistantContent += resultMessage.content
-            assistantMessage = resultMessage
-            assistantMessage.content = assistantContent
+          assistantContent += resultMessage.content;
+          assistantMessage = resultMessage;
+          assistantMessage.content = assistantContent;
+          assistantMessage.time = getCurrentTime(); // Add this line
         }
 
         if (resultMessage.role === TOOL) toolMessage = resultMessage
@@ -119,10 +237,17 @@ const Chat = () => {
             isEmpty(toolMessage) ?
                 setMessages([...messages, userMessage, assistantMessage]) :
                 setMessages([...messages, userMessage, toolMessage, assistantMessage]);
+
+                setMessages([...messages, userMessage, assistantMessage]);
+
+
         } else {
             isEmpty(toolMessage) ?
                 setMessages([...messages, assistantMessage]) :
                 setMessages([...messages, toolMessage, assistantMessage]);
+
+                setMessages([...messages, toolMessage, assistantMessage]);
+
         }
     }
 
@@ -137,9 +262,12 @@ const Chat = () => {
             role: "user",
             content: question,
             date: new Date().toISOString(),
+            time: getCurrentTime(), // Add this line
+
         };
 
         let conversation: Conversation | null | undefined;
+        console.log(conversationId)
         if(!conversationId){
             conversation = {
                 id: conversationId ?? uuid(),
@@ -148,6 +276,7 @@ const Chat = () => {
                 date: new Date().toISOString(),
             }
         }else{
+            console.log(appStateContext?.state?.currentChat)
             conversation = appStateContext?.state?.currentChat
             if(!conversation){
                 console.error("Conversation not found.");
@@ -170,8 +299,11 @@ const Chat = () => {
         let result = {} as ChatResponse;
         try {
             const response = await conversationApi(request, abortController.signal);
-            if (response?.body) {
+            console.log(response);
+                        if (response?.body) {
                 const reader = response.body.getReader();
+                console.log(reader);
+
                 let runningText = "";
 
                 while (true) {
@@ -216,7 +348,8 @@ const Chat = () => {
                     id: uuid(),
                     role: ERROR,
                     content: errorMessage,
-                    date: new Date().toISOString()
+                    date: new Date().toISOString(),
+                    time: getCurrentTime(), // Add this line
                 }
                 conversation.messages.push(errorChatMsg);
                 appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
@@ -245,6 +378,7 @@ const Chat = () => {
             role: "user",
             content: question,
             date: new Date().toISOString(),
+            time: getCurrentTime(), // Add this line
         };
 
         //api call params set here (generate)
@@ -278,7 +412,9 @@ const Chat = () => {
                     id: uuid(),
                     role: ERROR,
                     content: "There was an error generating a response. Chat history can't be saved at this time. If the problem persists, please contact the site administrator.",
-                    date: new Date().toISOString()
+                    date: new Date().toISOString(),
+                    time: getCurrentTime(), // Add this line
+
                 }
                 let resultConversation;
                 if(conversationId){
@@ -380,7 +516,9 @@ const Chat = () => {
                     id: uuid(),
                     role: ERROR,
                     content: errorMessage,
-                    date: new Date().toISOString()
+                    date: new Date().toISOString(),
+                    time: getCurrentTime(), // Add this line
+
                 }
                 let resultConversation;
                 if(conversationId){
@@ -494,7 +632,9 @@ const Chat = () => {
                                 id: uuid(),
                                 role: ERROR,
                                 content: errorMessage,
-                                date: new Date().toISOString()
+                                date: new Date().toISOString(),
+                                time: getCurrentTime(), // Add this line
+
                             }
                             if(!appStateContext?.state.currentChat?.messages){
                                 let err: Error = {
@@ -585,53 +725,111 @@ const Chat = () => {
                                     className={styles.chatIcon}
                                     aria-hidden="true"
                                 />
-                                <h1 className={styles.chatEmptyStateTitle}>Start chatting</h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}>This ABCABCchatbot is configured to answer your questions</h2>
+                                <h1 className={styles.chatEmptyStateTitle}>Servus, how can I help you?</h1>
+                                <h2 className={styles.chatEmptyStateSubtitle}>Please specify your study program and location when asking program-specific details</h2>
+
                             </Stack>
                         ) : (
-                            <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}} role="log">
-                                {messages.map((answer, index) => (
-                                    <>
-                                        {answer.role === "user" ? (
-                                            <div className={styles.chatMessageUser} tabIndex={0}>
-                                                <div className={styles.chatMessageUserMessage}>{answer.content}</div>
-                                            </div>
-                                        ) : (
-                                            answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
-                                                <Answer
-                                                    answer={{
-                                                        answer: answer.content,
-                                                        citations: parseCitationFromMessage(messages[index - 1]),
-                                                    }}
-                                                    onCitationClicked={c => onShowCitation(c)}
-                                                />
-                                            </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
-                                                <Stack horizontal className={styles.chatMessageErrorContent}>
-                                                    <ErrorCircleRegular className={styles.errorIcon} style={{color: "rgba(182, 52, 67, 1)"}} />
-                                                    <span>Error</span>
-                                                </Stack>
-                                                <span className={styles.chatMessageErrorContent}>{answer.content}</span>
-                                            </div> : null
-                                        )}
-                                    </>
-                                ))}
-                                {showLoadingMessage && (
-                                    <>
-                                        <div className={styles.chatMessageGpt}>
-                                            <Answer
-                                                answer={{
-                                                    answer: "Generating answer...",
-                                                    citations: []
-                                                }}
-                                                onCitationClicked={() => null}
-                                            />
-                                        </div>
-                                    </>
-                                )}
-                                <div ref={chatMessageStreamEnd} />
-                            </div>
-                        )}
+                            <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px" }} role="log">
+    {messages.map((answer, index) => {
+    const likeClicked = likedMessages.some((item) => item.index === index && item.action === 1);
+    const dislikeClicked = likedMessages.some((item) => item.index === index && item.action === -1);
 
+    return (
+        <div key={index}>
+            {answer.role === "user" ? (
+                                    <><div className={styles.timestamp}>{answer.time}</div><div className={styles.chatMessageUser} tabIndex={0}>
+                    <div className={styles.chatMessageUserMessage}>{answer.content}</div>
+
+
+                </div></>
+            ) : (
+                answer.role === "assistant" ? (
+                    <><div className={styles.timestamp}>{answer.time}</div>
+                                            <img src="https://static.thenounproject.com/png/3263196-200.png" alt="Assistant" className={styles.assistantImage} />
+
+                    <div className={styles.chatMessageGpt}>
+
+                        <div className={styles.assistantContent}>
+
+                            <Answer
+                                answer={{
+                                    answer: answer.content,
+                                    citations: parseCitationFromMessage(messages[index - 1]),
+                                }}
+                                onCitationClicked={(c) => onShowCitation(c)} />
+                                            </div>
+
+                            {answer.role === "assistant" && (
+                                <div className={styles.buttonContainer}>
+                                    <div
+                                        className={`${styles.questionInputSendButtonContainer} ${likeClicked ? styles.clickedButton : ''}`}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => handleLikeDislike(index, 1)}
+                                        style={{ cursor: likedMessages.some((item) => item.index === index) ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        <img src={likeClicked ? like2 : like} className={styles.questionInputSendButton} alt="Like" />
+                                    </div>
+                                    <div
+                                        className={`${styles.questionInputSendButtonContainer} ${dislikeClicked ? styles.clickedButton : ''}`}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => handleLikeDislike(index, -1)}
+                                        style={{ cursor: likedMessages.some((item) => item.index === index) ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        <img src={dislikeClicked ? dislike2 : dislike} className={styles.questionInputSendButton} alt="Dislike" />
+                                    </div>
+                                </div>
+                            )}
+                        </div></>
+                ) : (
+                    answer.role === ERROR ? (
+                        <div className={styles.chatMessageError}>
+                            <Stack horizontal className={styles.chatMessageErrorContent}>
+                                <ErrorCircleRegular className={styles.errorIcon} style={{ color: "rgba(182, 52, 67, 1)" }} />
+                                <span>Error</span>
+                            </Stack>
+                            <span className={styles.chatMessageErrorContent}>{answer.content}</span>
+                        </div>
+                    ) : null
+                )
+            )}
+        </div>
+    );
+})}
+
+    {showLoadingMessage && (
+        <div className={styles.chatMessageGpt}>
+            <Answer
+                answer={{
+                    answer: "Generating answer...",
+                    citations: []
+                }}
+                onCitationClicked={() => null}
+            />
+        </div>
+    )}
+    <div ref={chatMessageStreamEnd} />
+</div>
+
+                        )}
+  <div className="learning-options-container" style={buttonContainerStyle}>
+      {/* Button 1 */}
+      <div style={buttonStyle} onClick={() => handleButtonClick('Recognition of Modules')}>
+        <span className="learning-option-button-text">Recognition of Modules </span>
+      </div>
+
+      {/* Button 2 */}
+      <div style={buttonStyle} onClick={() => handleButtonClick('Thesis')}>
+        <span className="learning-option-button-text">Thesis</span>
+      </div>
+
+      {/* Button 3 */}
+      <div style={buttonStyle} onClick={() => handleButtonClick('Specialization in Managemen')}>
+        <span className="learning-option-button-text">Specialization in Management</span>
+      </div>
+    </div>
                         <Stack horizontal className={styles.chatInput}>
                             {isLoading && (
                                 <Stack 
@@ -696,7 +894,7 @@ const Chat = () => {
                             </Stack>
                             <QuestionInput
                                 clearOnSend
-                                placeholder="Type a new question pleaseeeeeeeeeeee..."
+                                placeholder="Type Your Question"
                                 disabled={isLoading}
                                 onSend={(question, id) => {
                                     appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
@@ -727,6 +925,8 @@ const Chat = () => {
                 {(appStateContext?.state.isChatHistoryOpen && appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured) && <ChatHistoryPanel/>}
                 </Stack>
             )}
+       
+
         </div>
     );
 };
