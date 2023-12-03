@@ -180,6 +180,7 @@ def generateFilterString(userToken):
     return f"{AZURE_SEARCH_PERMITTED_GROUPS_COLUMN}/any(g:search.in(g, '{group_ids}'))"
 
 
+#from text_validaiton import validate
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
@@ -521,6 +522,46 @@ def conversation_without_data(request_body):
     else:
         return Response(stream_without_data(response, history_metadata), mimetype='text/event-stream')
 
+from text_validaiton import harmful_filter, mental_health_filter
+def user_input_validation(request_body):
+    print(request_body)
+    user_input = request_body["messages"][-1]['content']
+    print(user_input)
+    validation_code = 0
+    if harmful_filter(user_input):
+        validation_code = 1
+    elif mental_health_filter(user_input):
+        validation_code = 2
+    print(validation_code)
+    return validation_code 
+    
+
+def harmful_input_handling():    
+    response_obj = {
+        "choices": [{
+            "messages": [{
+                "role": "assistant",
+                "content": 'Your prompt has been marked as unsafe. Kindly adhire to the resposible use. An incident report has been created.'
+            }]
+        }],
+        "history_metadata": {}
+    }
+
+    return jsonify(response_obj), 200
+
+def mental_health_input_handling():    
+    response_obj = {
+        "choices": [{
+            "messages": [{
+                "role": "assistant",
+                "content": 'Your prompt has been marked as unsafe. Kindly refer to the mental health safety web page.'
+            }]
+        }],
+        "history_metadata": {}
+    }
+
+    return jsonify(response_obj), 200
+
 
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
@@ -528,6 +569,11 @@ def conversation():
     return conversation_internal(request_body)
 
 def conversation_internal(request_body):
+    validation_code = user_input_validation(request_body)
+    if validation_code == 1:
+        return harmful_input_handling()
+    elif validation_code == 2:
+        return mental_health_input_handling()
     try:
         use_data = should_use_data()
         if use_data:
