@@ -38,6 +38,7 @@ const Layout = () => {
     const [copyClicked, setCopyClicked] = useState<boolean>(false);
     const [copyText, setCopyText] = useState<string>("Copy URL");
     const appStateContext = useContext(AppStateContext)
+    
 
     const handleShareClick = () => {
         setIsSharePanelOpen(true);

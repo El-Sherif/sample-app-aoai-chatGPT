@@ -8,6 +8,8 @@ import "./index.css";
 import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
+import HomePage from "./pages/chat/HomePage";
+
 import { AppStateProvider } from "./state/AppProvider";
 
 initializeIcons();

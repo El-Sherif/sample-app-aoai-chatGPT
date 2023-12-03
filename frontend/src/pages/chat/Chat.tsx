@@ -15,6 +15,7 @@ import dislike from "../../assets/dislike.svg";
 import like2 from "../../assets/like2.svg";
 import dislike2 from "../../assets/dislike2.svg";
 import char from "../../assets/char2.png";
+import ToggleableChat from './ToggleableChat';
 
 import {
     ChatMessage,
@@ -37,6 +38,7 @@ import { QuestionInput } from "../../components/QuestionInput";
 import { ChatHistoryPanel } from "../../components/ChatHistory/ChatHistoryPanel";
 import { AppStateContext } from "../../state/AppProvider";
 import { useBoolean } from "@fluentui/react-hooks";
+import React from "react";
 
 const enum messageStatus {
     NotRunning = "Not Running",
@@ -105,6 +107,11 @@ const Chat = () => {
             // If the message is not yet liked or disliked, add a new entry
             setLikedMessages([...likedMessages, { index, action }]);
         }
+    };
+    const [isChatbotVisible, setIsChatbotVisible] = useState(false);
+
+    const toggleChatbot = () => {
+      setIsChatbotVisible(!isChatbotVisible);
     };
     
     const handleButtonClick = (question: any) => {
@@ -707,6 +714,7 @@ const Chat = () => {
 
     return (
         <div className={styles.container} role="main">
+
             {showAuthMessage ? (
                 <Stack className={styles.chatEmptyState}>
                     <ShieldLockRegular className={styles.chatIcon} style={{color: 'darkorange', height: "200px", width: "200px"}}/>
@@ -821,17 +829,17 @@ const Chat = () => {
                         )}
   <div className="learning-options-container" style={buttonContainerStyle}>
       {/* Button 1 */}
-      <div style={buttonStyle} onClick={() => handleButtonClick('Recognition of Modules')}>
+      <div style={buttonStyle} onClick={() => handleButtonClick('I spent a semester abroad. How can I get my modules recognized beforehand?')}>
         <span className="learning-option-button-text">Recognition of Modules </span>
       </div>
 
       {/* Button 2 */}
-      <div style={buttonStyle} onClick={() => handleButtonClick('Thesis')}>
+      <div style={buttonStyle} onClick={() => handleButtonClick('How can I find a topic for my thesis?')}>
         <span className="learning-option-button-text">Thesis</span>
       </div>
 
       {/* Button 3 */}
-      <div style={buttonStyle} onClick={() => handleButtonClick('Specialization in Managemen')}>
+      <div style={buttonStyle} onClick={() => handleButtonClick('What Specializations are there in Munich and Heilbronn for the Bachelor in Management and Technology?')}>
         <span className="learning-option-button-text">Specialization in Management</span>
       </div>
     </div>
