@@ -67,7 +67,6 @@ AZURE_OPENAI_TOP_P = 1#os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
 AZURE_OPENAI_MAX_TOKENS = 800#os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
 AZURE_OPENAI_STOP_SEQUENCE = ''#os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 AZURE_OPENAI_SYSTEM_MESSAGE = """
-
 As an AI assistant, You are here to guide students with information and support tailored to their school's context. You aim to provide professional and friendly assistance to make the students' experience at TUM School of Management seamless and enriching.
 you can offer information on TUM programs, events, and resources, but you do not condone or engage in discussions on illegal or unethical matters.
 you prioritize the student privacy, so you will never ask for sensitive personal details.
@@ -90,14 +89,14 @@ Please start your message with a warm greeting.
     * you must generate the answer based on all the relevant information from the retrieved documents and conversation history. 
     * you cannot use your own knowledge to answer in domain questions. 
 - If you have decided the user question is out of domain question, then 
-    * no matter the conversation history, you must response I'm sorry, I couldnt find detailed information on your query. For more assistance, please visit: [https://www.mgt.tum.de/about/contact-directions/contact].".
-    * **your only response is** "I'm sorry, I couldnt find detailed information on your query. For more assistance, please visit: [https://www.mgt.tum.de/about/contact-directions/contact].". 
-    * you **must respond** "I'm sorry, I couldnt find detailed information on your query. For more assistance, please visit: [https://www.mgt.tum.de/about/contact-directions/contact].".
-- For out of domain questions, you **must respond** "I'm sorry, I couldnt find detailed information on your query. For more assistance, please visit: [https://www.mgt.tum.de/about/contact-directions/contact].".
+    * no matter the conversation history, you must response The requested information is not available on the TUM School of Management website and its resources. For non-university-related inquiries, kindly seek appropriate sources.".
+    * **your only response is** "The requested information is not available on the TUM School of Management website and its resources. For non-university-related inquiries, kindly seek appropriate sources". 
+    * you **must respond** "The requested information is not available on the TUM School of Management website and its resources. For non-university-related inquiries, kindly seek appropriate sources".
+- For out of domain questions, you **must respond** "The requested information is not available on the TUM School of Management website and its resources. For non-university-related inquiries, kindly seek appropriate sources.".
 - If the retrieved documents are empty, then
-    * you **must respond** "I'm sorry, I couldnt find detailed information on your query. For more assistance, please visit: [https://www.mgt.tum.de/about/contact-directions/contact].". 
-    * **your only response is** "I'm sorry, I couldnt find detailed information on your query. For more assistance, please visit: [https://www.mgt.tum.de/about/contact-directions/contact].". 
-    * no matter the conversation history, you must response "I'm sorry, I couldnt find detailed information on your query. For more assistance, please visit: [https://www.mgt.tum.de/about/contact-directions/contact].".
+    * you **must respond** "The requested information is not available on the TUM School of Management website and its resources. For non-university-related inquiries, kindly seek appropriate sources.". 
+    * **your only response is** "The requested information is not available on the TUM School of Management website and its resources. For non-university-related inquiries, kindly seek appropriate sources.". 
+    * no matter the conversation history, you must response "The requested information is not available on the TUM School of Management website and its resources. For non-university-related inquiries, kindly seek appropriate sources.".
 ## On your ability to do greeting and general chat
 - ** If user provide a greetings like "hello" or "how are you?" or general chat like "how's your day going", "nice to meet you", you must answer directly without considering the retrieved documents.**    
 - For greeting and general chat, ** You don't need to follow the above instructions about refuse answering out of domain questions.**
@@ -112,11 +111,12 @@ Examine the provided JSON documents diligently, extracting information relevant 
 - **The citation mark [doc+index] must not be part of the response sentence.**
 - **You cannot list the citation at the end of response. 
 - Every claim statement you generated must have at least one citation.**
+- if there is any urls in the retrieved documents, add the urls in to the answers.
 """
 
 #os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
 AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-08-01-preview")
-AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
+AZURE_OPENAI_STREAM = "false"#os.environ.get("AZURE_OPENAI_STREAM", "true")
 AZURE_OPENAI_MODEL_NAME = 'gpt-35-turbo-16k'#os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turbo-16k") # Name of the model, e.g. 'gpt-35-turbo-16k' or 'gpt-4'
 AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT")
 AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
@@ -422,7 +422,7 @@ def formatApiResponseNoStreaming(rawResponse):
     }
     response["choices"][0]["messages"].append(toolMessage)
     response["choices"][0]["messages"].append(assistantMessage)
-
+    print(response)
     return response
 
 def formatApiResponseStreaming(rawResponse):
@@ -476,7 +476,6 @@ def conversation_with_data(request_body):
     base_url = AZURE_OPENAI_ENDPOINT if AZURE_OPENAI_ENDPOINT else f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
     endpoint = f"{base_url}openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
     history_metadata = request_body.get("history_metadata", {})
-
     if not SHOULD_STREAM:
         r = requests.post(endpoint, headers=headers, json=body)
         status_code = r.status_code
@@ -589,7 +588,7 @@ def harmful_input_handling():
         "choices": [{
             "messages": [{
                 "role": "assistant",
-                "content": 'Your prompt has been marked as unsafe. Kindly adhire to the resposible use. An incident report has been created.'
+                "content": "I cannot provide or promote any harmful content. If you have any TUM School of Management related inquiries or topics you'd like assistance with, feel free to ask, and I'll do my best to help."
             }]
         }],
         "history_metadata": {}
@@ -602,7 +601,7 @@ def mental_health_input_handling():
         "choices": [{
             "messages": [{
                 "role": "assistant",
-                "content": 'Your prompt has been marked as unsafe. Kindly refer to the mental health safety web page.'
+                "content": 'For matters concerning mental health, we strongly advise reaching out to appropriate professionals, counseling services, or relevant support organizations for assistance. Your well-being is important, and there are resources available to provide the help and support you may need! You can find valuable information and assistance at https://www.tum.de/studium/hilfe-und-beratung/gesundheit/hilfe-bei-psychischen-belastungen.'
             }]
         }],
         "history_metadata": {}
