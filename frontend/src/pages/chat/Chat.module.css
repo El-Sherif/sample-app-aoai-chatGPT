@@ -104,13 +104,19 @@
     max-width: 800px;
 }
 
-.chatMessageGpt {
+.leftMessageContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
     margin-bottom: 12px;
     max-width: 80%;
+  }
+  
+  .chatMessageGpt {
     display: flex;
-    
-
-}
+    flex-direction: column;
+    margin-left: 12px; /* Adjust the margin as needed */
+  }
 
 .chatMessageError {
     padding: 20px;
@@ -339,14 +345,13 @@ a {
 
 .buttonContainer {
     display: flex;
-    justify-content: center; /* Center items horizontally */
-    gap: 10px; /* Adjust the gap between buttons as needed */
-    margin-top: 10px; /* Adjust the top margin to separate buttons from the message */
-}
+    justify-content: center;
+    margin-top: 8px; /* Adjust the margin as needed */
+  }
 
 .questionInputSendButtonContainer {
-    /* Optional: Add styling for the button container if needed */
-}
+    margin: 0 4px;
+  }
 
 .questionInputSendButton {
     width: 20px; /* Adjust the width as needed */

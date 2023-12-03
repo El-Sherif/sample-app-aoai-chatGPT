@@ -742,65 +742,64 @@ const Chat = () => {
 
     return (
         <div key={index}>
-            {answer.role === "user" ? (
-                                    <><div className={styles.timestamp}>{answer.time}</div><div className={styles.chatMessageUser} tabIndex={0}>
-                    <div className={styles.chatMessageUserMessage}>{answer.content}</div>
-
-
-                </div></>
-            ) : (
-                answer.role === "assistant" ? (
-                    <><div className={styles.timestamp}>{answer.time}</div>
-                                            <img src={char} alt="Assistant" className={styles.assistantImage} />
-
-                    <div className={styles.chatMessageGpt}>
-
-                        <div className={styles.assistantContent}>
-
-                            <Answer
-                                answer={{
-                                    answer: answer.content,
-                                    citations: parseCitationFromMessage(messages[index - 1]),
-                                }}
-                                onCitationClicked={(c) => onShowCitation(c)} />
-                                            </div>
-
-                            {answer.role === "assistant" && (
-                                <div className={styles.buttonContainer}>
-                                    <div
-                                        className={`${styles.questionInputSendButtonContainer} ${likeClicked ? styles.clickedButton : ''}`}
-                                        role="button"
-                                        tabIndex={0}
-                                        onClick={() => handleLikeDislike(index, 1)}
-                                        style={{ cursor: likedMessages.some((item) => item.index === index) ? 'not-allowed' : 'pointer' }}
-                                    >
-                                        <img src={likeClicked ? like2 : like} className={styles.questionInputSendButton} alt="Like" />
+        {answer.role === "user" ? (
+          <>
+            <div className={styles.timestamp}>{answer.time}</div>
+            <div className={styles.chatMessageUser} tabIndex={0}>
+              <div className={styles.chatMessageUserMessage}>{answer.content}</div>
+            </div>
+          </>
+        ) : (
+          answer.role === "assistant" ? (
+            <><div className={styles.timestamp}>{answer.time}</div><div className={styles.leftMessageContainer}>
+                            <img src={char} alt="Assistant" className={styles.assistantImage} />
+                            <div className={styles.chatMessageGpt}>
+                                <Answer
+                                    answer={{
+                                        answer: answer.content,
+                                        citations: parseCitationFromMessage(messages[index - 1]),
+                                    }}
+                                    onCitationClicked={(c) => onShowCitation(c)} />
+                                {answer.role === "assistant" && (
+                                    <div className={styles.buttonContainer}>
+                                        <div
+                                            className={`${styles.questionInputSendButtonContainer} ${likeClicked ? styles.clickedButton : ''}`}
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() => handleLikeDislike(index, 1)}
+                                            style={{ cursor: likedMessages.some((item) => item.index === index) ? 'not-allowed' : 'pointer' }}
+                                        >
+                                            <img src={likeClicked ? like2 : like} className={styles.questionInputSendButton} alt="Like" />
+                                        </div>
+                                        <div
+                                            className={`${styles.questionInputSendButtonContainer} ${dislikeClicked ? styles.clickedButton : ''}`}
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() => handleLikeDislike(index, -1)}
+                                            style={{ cursor: likedMessages.some((item) => item.index === index) ? 'not-allowed' : 'pointer' }}
+                                        >
+                                            <img src={dislikeClicked ? dislike2 : dislike} className={styles.questionInputSendButton} alt="Dislike" />
+                                        </div>
                                     </div>
-                                    <div
-                                        className={`${styles.questionInputSendButtonContainer} ${dislikeClicked ? styles.clickedButton : ''}`}
-                                        role="button"
-                                        tabIndex={0}
-                                        onClick={() => handleLikeDislike(index, -1)}
-                                        style={{ cursor: likedMessages.some((item) => item.index === index) ? 'not-allowed' : 'pointer' }}
-                                    >
-                                        <img src={dislikeClicked ? dislike2 : dislike} className={styles.questionInputSendButton} alt="Dislike" />
-                                    </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div></>
-                ) : (
-                    answer.role === ERROR ? (
-                        <div className={styles.chatMessageError}>
-                            <Stack horizontal className={styles.chatMessageErrorContent}>
-                                <ErrorCircleRegular className={styles.errorIcon} style={{ color: "rgba(182, 52, 67, 1)" }} />
-                                <span>Error</span>
-                            </Stack>
-                            <span className={styles.chatMessageErrorContent}>{answer.content}</span>
-                        </div>
-                    ) : null
-                )
-            )}
-        </div>
+          ) : (
+            answer.role === ERROR ? (
+              <div className={styles.chatMessageError}>
+                <Stack horizontal className={styles.chatMessageErrorContent}>
+                  <ErrorCircleRegular className={styles.errorIcon} style={{ color: "rgba(182, 52, 67, 1)" }} />
+                  <span>Error</span>
+                </Stack>
+                <span className={styles.chatMessageErrorContent}>{answer.content}</span>
+              </div>
+            ) : null
+          )
+        )}
+      </div>
+      
+
+
     );
 })}
 
@@ -821,17 +820,17 @@ const Chat = () => {
                         )}
   <div className="learning-options-container" style={buttonContainerStyle}>
       {/* Button 1 */}
-      <div style={buttonStyle} onClick={() => handleButtonClick('Recognition of Modules')}>
+      <div style={buttonStyle} onClick={() => handleButtonClick('I spent a semester abroad. How can I get my modules recognized beforehand?')}>
         <span className="learning-option-button-text">Recognition of Modules </span>
       </div>
 
       {/* Button 2 */}
-      <div style={buttonStyle} onClick={() => handleButtonClick('Thesis')}>
+      <div style={buttonStyle} onClick={() => handleButtonClick('How can I find a topic for my thesis?')}>
         <span className="learning-option-button-text">Thesis</span>
       </div>
 
       {/* Button 3 */}
-      <div style={buttonStyle} onClick={() => handleButtonClick('Specialization in Managemen')}>
+      <div style={buttonStyle} onClick={() => handleButtonClick('What Specializations are there in Munich and Heilbronn for the Bachelor in Management and Technology?')}>
         <span className="learning-option-button-text">Specialization in Management</span>
       </div>
     </div>
