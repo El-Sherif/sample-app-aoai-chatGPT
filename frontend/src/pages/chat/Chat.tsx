@@ -14,6 +14,8 @@ import like from "../../assets/like.svg";
 import dislike from "../../assets/dislike.svg";
 import like2 from "../../assets/like2.svg";
 import dislike2 from "../../assets/dislike2.svg";
+import char from "../../assets/char2.png";
+
 import {
     ChatMessage,
     ConversationRequest,
@@ -105,14 +107,17 @@ const Chat = () => {
         }
     };
     
-    const handleButtonClick = (question: any, conversationId?: string) => {
+    const handleButtonClick = (question: any) => {
         if (!isLoading) {
+
+            let conversationId=appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined;
+
           if (appStateContext?.state.isCosmosDBAvailable?.cosmosDB) {
             // Make API request with Cosmos DB
-            makeApiRequestWithCosmosDB(question);
+            makeApiRequestWithCosmosDB(question,conversationId);
           } else {
             // Make API request without Cosmos DB
-            makeApiRequestWithoutCosmosDB(question);
+         makeApiRequestWithoutCosmosDB(question, conversationId);
           }
         }
       };
@@ -746,7 +751,7 @@ const Chat = () => {
             ) : (
                 answer.role === "assistant" ? (
                     <><div className={styles.timestamp}>{answer.time}</div>
-                                            <img src="https://static.thenounproject.com/png/3263196-200.png" alt="Assistant" className={styles.assistantImage} />
+                                            <img src={char} alt="Assistant" className={styles.assistantImage} />
 
                     <div className={styles.chatMessageGpt}>
 

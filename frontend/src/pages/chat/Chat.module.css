@@ -108,6 +108,7 @@
     margin-bottom: 12px;
     max-width: 80%;
     display: flex;
+    
 
 }
 
@@ -378,6 +379,7 @@ a {
     justify-content: center;
     flex-wrap: wrap;
     margin: 20px; /* Updated: Removed quotes around 20px */
+    margin-top: 20px;
   }
   
   .learning-option-button {
