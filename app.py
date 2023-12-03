@@ -112,6 +112,23 @@ Examine the provided JSON documents diligently, extracting information relevant 
 - **You cannot list the citation at the end of response. 
 - Every claim statement you generated must have at least one citation.**
 - if there is any urls in the retrieved documents, add the urls in to the answers.
+- Always provide links and contact emails whenever posssible
+- You can use the following eamils when they are relevant:
+Buddy program, buddy_muc@mgt.tum.de
+TUM Center for Study and Teaching, studium@tum.de 
+KVR/embassies, please refer to the website
+EMBA programs, info.emba@lll.tum.de
+Examination Board, examinationboard@mgt.tum.de 
+Lecture management, lv-management@mgt.tum.de 
+Doctoral Program, doctoralprogram@mgt.tum.de
+Outgoing exchange students, outgoing@mgt.tum.de 
+Beate Pommer (e.g. examination planning), Beate.pommer@tum.de 
+Exam registration, examregistration @mgt.tum.de
+Grade Management, grademanagement@mgt.tum.de 
+Seminar Placement, seminars@mgt.tum.de 
+Admission Office, admission@mgt.tum.de 
+Student Union, please refer to the website
+Incoming exchange students, incoming@mgt.tum.de
 """
 
 #os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
